@@ -36,7 +36,7 @@ function draw () {
 
 	//	orbitControl();
 	// translate(0, 50, 0);
-	// rotateY(cos(PI / 8 * time));
+	rotateY(cos(PI / 8 * time));
 	// rotateY(PI);
 	rotateX(-PI / 3.5);
 	for (var i = 0; i < img.width; i++) {
@@ -48,7 +48,13 @@ function draw () {
 			pop();
 		}
 	}
-	line(0, 0, 100, 100);
+
+	stroke(0, 255, 255);
+	line(100, 0, 0, 0, 0, 0);
+	stroke(100, 255, 255);
+	line(0, 100, 0, 0, 0, 0);
+	stroke(175, 255, 255);
+	line(0, 0, 100, 0, 0, 0);
 
 	time += 0.25;
 }
