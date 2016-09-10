@@ -8,11 +8,13 @@ var dotSize = 8;
 var players = [];
 var startTime = 0;
 
-function preload () {
+function preload()
+{
 	img = loadImage('assets/world.png');
 }
 
-function setup () {
+function setup()
+{
 	createCanvas(600, 400);
 	colorMode(HSB, 255);
 	frameRate(60);
@@ -26,53 +28,65 @@ function setup () {
 	addPlayers(8);
 }
 
-function buildWorld () {
+function buildWorld()
+{
 	worldMap = {
 		dots: [],
 		width: img.width,
 		height: img.height
 	};
 
-	for (var i = 0; i < worldMap.width; i++) {
+	for (var i = 0; i < worldMap.width; i++)
+	{
 		worldMap.dots.push([]);
-		for (var j = 0; j < worldMap.height; j++) {
+		for (var j = 0; j < worldMap.height; j++)
+		{
 			worldMap.dots[i].push(new Dot(i, j, img.get(i, j), dotSize, margin));
 		}
 	}
 }
 
-function addPlayers (count) {
+function addPlayers(count)
+{
 	players = [];
 
-	for (var i = 0; i < count; i++) {
+	for (var i = 0; i < count; i++)
+	{
 		var player = new Player(i, color(map(i, 0, count, 0, 255), random(180, 255), 255));
 		player.start();
 		players.push(player);
 	}
 
-	for (var i = 0; i < players.length; i++) {
+	for (var i = 0; i < players.length; i++)
+	{
 		players[i].update(worldMap);
 	}
 }
 
-function draw () {
+function draw()
+{
 	background(0);
 
-	if (++startTime > 30) {
-		for (var i = 0; i < players.length; i++) {
+	if (++startTime > 30)
+	{
+		for (var i = 0; i < players.length; i++)
+		{
 			players[i].update(worldMap);
 		}
 	}
 
-	for (var i = 0; i < worldMap.width; i++) {
-		for (var j = 0; j < worldMap.height; j++) {
+	for (var i = 0; i < worldMap.width; i++)
+	{
+		for (var j = 0; j < worldMap.height; j++)
+		{
 			var dot = worldMap.dots[i][j];
 			dot.show(margin);
 		}
 	}
 }
 
-function keyPressed () {
+function keyPressed()
+{
 	buildWorld();
 	addPlayers(8);
 	startTime = 0;
