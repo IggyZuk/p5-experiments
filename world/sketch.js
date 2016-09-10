@@ -15,6 +15,8 @@ function preload()
 
 function setup()
 {
+	console.time("Initializing Time");
+
 	createCanvas(600, 400);
 	colorMode(HSB, 255);
 	frameRate(60);
@@ -26,6 +28,17 @@ function setup()
 
 	buildWorld();
 	addPlayers(8);
+
+	console.group();
+	console.info("Initializing world!");
+	console.table(players);
+	console.dir(worldMap);
+	console.assert(players.length == 8);
+	console.warn("How did you get here!?");
+	console.error("STOP!");
+	console.groupEnd();
+
+	console.timeEnd("Initializing Time");
 }
 
 function buildWorld()
@@ -90,4 +103,6 @@ function keyPressed()
 	buildWorld();
 	addPlayers(8);
 	startTime = 0;
+
+	console.count("key pressed");
 }
