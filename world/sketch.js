@@ -1,3 +1,5 @@
+"use strict";
+
 var img = null;
 
 var worldMap;
@@ -39,6 +41,15 @@ function setup()
 	console.groupEnd();
 
 	console.timeEnd("Initializing Time");
+
+	var p = createP('');
+	var button = createButton("Restart");
+	button.parent(p);
+
+	button.mouseClicked(function()
+	{
+		keyPressed();
+	});
 }
 
 function buildWorld()
