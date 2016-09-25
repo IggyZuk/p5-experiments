@@ -1,24 +1,47 @@
 var vertices = [];
+var indices = [];
+var drawVertices = true;
 
 function setup() {
 	pixelDensity(0.5);
 	createCanvas(800, 600, WEBGL);
 	colorMode(HSB, 255, 255, 255);
+
+	createSphere(250, 32, 32);
 }
 
-function createSphere(r) {
+function createSphere(r, t, p) {
 	vertices = [];
 
-	var r = 100 * r;
-	var theta = 32;
-	var phi = 8;
+	var r = r;
+	var theta = t;
+	var phi = p;
+
+	for (var i = 0; i <= theta; i++) {
+		var c = color((i * theta) * 0.25, 255, 255);
+		for (var j = 0; j < phi; j++) {
+			var v = Spherical(
+				r,
+				(i / theta) * 180,
+				(j / phi) * 360);
+
+			v.clr = c;
+			addVertex(v);
+		}
+	}
 
 	for (var i = 0; i < theta; i++) {
 		for (var j = 0; j < phi; j++) {
-			addVertex(Spherical(
-				r,
-				i / theta * 360,
-				j / phi * 360));
+			var first = (i * phi) + j;
+			var second = first + phi;
+
+			indices.push(first);
+			indices.push(second);
+			indices.push(first + 1);
+
+			indices.push(second);
+			indices.push(second + 1);
+			indices.push(first + 1);
 		}
 	}
 }
@@ -35,14 +58,15 @@ function Point3D(x, y, z) {
 	this.x = x;
 	this.y = y;
 	this.z = z;
+	this.clr = color(random(255), 255, 255);
 }
 
 function Spherical(r, theta, phi) {
 	var v = new Point3D();
-	var snt = sin(theta * PI / 180);
-	var cnt = cos(theta * PI / 180);
-	var snp = sin(phi * PI / 180);
-	var cnp = cos(phi * PI / 180);
+	var snt = sin(theta * (PI / 180));
+	var cnt = cos(theta * (PI / 180));
+	var snp = sin(phi * (PI / 180));
+	var cnp = cos(phi * (PI / 180));
 	v.x = r * snt * cnp;
 	v.y = r * cnt;
 	v.z = -r * snt * snp;
@@ -50,39 +74,32 @@ function Spherical(r, theta, phi) {
 }
 
 function draw() {
-	createSphere(((cos(frameCount * 0.025) + 1) / 2) * 2 + 1);
+	background(64);
+	orbitControl();
 
-	background(0);
+	if (drawVertices) {
+		vertices.forEach(v => {
+			push();
+			basicMaterial(v.clr);
+			translate(
+				v.x,
+				v.y,
+				v.z
+			);
+			sphere(5);
+			pop();
+		});
+	}
 
-	rotateX(frameCount * 0.01);
-	rotateY(frameCount * 0.01);
-	//rotateZ(frameCount * 0.01);
+	for (var i = 0; i < indices.length - 3; i += 3) {
+		var a = vertices[indices[i]];
+		var b = vertices[indices[i + 1]];
+		var c = vertices[indices[i + 2]];
 
-	// vertices.forEach(v => {
-	// 	push();
-	// 	basicMaterial(random(100, 255), 255, 255);
-	// 	translate(
-	// 		v.x,
-	// 		v.y,
-	// 		v.z
-	// 	);
-	// 	sphere(3);
-	// 	pop();
-	// });
-
-	for (var i = 0; i < vertices.length; i++) {
-		for (var j = 0; j < vertices.length; j++) {
-			var a = vertices[i];
-			var b = vertices[j];
-
-			if (random() < 0.01) {
-				if (random() < 0.9) {
-					fill(map(dist(a.x, a.y, a.z, b.x, b.y, b.z), 0, 550, 255, 0), 255, 255);
-				} else {
-					fill(random(255), 255, 255);
-				}
-				line(a.x, a.y, a.z, b.x, b.y, b.z);
-			}
-		}
+		fill(c.clr);
+		triangle(
+			a.x, a.y, a.z,
+			b.x, b.y, b.z,
+			c.x, c.y, c.z);
 	}
 }
