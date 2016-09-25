@@ -1,24 +1,24 @@
 var vertices = [];
 var indices = [];
-var drawVertices = true;
+var drawVertices = false;
 
 function setup() {
 	pixelDensity(0.5);
 	createCanvas(800, 600, WEBGL);
 	colorMode(HSB, 255, 255, 255);
 
-	createSphere(250, 32, 32);
+	createSphere(250, 16, 16);
 }
 
 function createSphere(r, t, p) {
 	vertices = [];
-
+	indices = [];
 	var r = r;
-	var theta = t;
+	var theta = t - 1;
 	var phi = p;
 
 	for (var i = 0; i <= theta; i++) {
-		var c = color((i * theta) * 0.25, 255, 255);
+		var c = color(i / theta * 255, 255, 255);
 		for (var j = 0; j < phi; j++) {
 			var v = Spherical(
 				r,
@@ -63,10 +63,10 @@ function Point3D(x, y, z) {
 
 function Spherical(r, theta, phi) {
 	var v = new Point3D();
-	var snt = sin(theta * (PI / 180));
-	var cnt = cos(theta * (PI / 180));
-	var snp = sin(phi * (PI / 180));
-	var cnp = cos(phi * (PI / 180));
+	var snt = sin(theta * PI / 180);
+	var cnt = cos(theta * PI / 180);
+	var snp = sin(phi * PI / 180);
+	var cnp = cos(phi * PI / 180);
 	v.x = r * snt * cnp;
 	v.y = r * cnt;
 	v.z = -r * snt * snp;
@@ -96,7 +96,7 @@ function draw() {
 		var b = vertices[indices[i + 1]];
 		var c = vertices[indices[i + 2]];
 
-		fill(c.clr);
+		fill((hue(a.clr) + hue(b.clr) + hue(c.clr)) / 3, 255, 255);
 		triangle(
 			a.x, a.y, a.z,
 			b.x, b.y, b.z,
