@@ -46,7 +46,6 @@ function Ball(x, y, r) {
 	this.vy = 0;
 	this.r = r;
 
-	colorMode(RGB);
 	this.brightness = 64;
 
 	this.update = function() {
@@ -97,7 +96,7 @@ function Ball(x, y, r) {
 
 					colorMode(HSB);
 					stroke(0, 255, 255);
-					line(this.x, this.y, this.x + dist.x * 5, this.y + dist.y * 5);
+					line(this.x, this.y, this.x + dist.x * 3, this.y + dist.y * 3);
 
 					this.vx = this.vx - dir.x;
 					this.vy = this.vy - dir.y;
