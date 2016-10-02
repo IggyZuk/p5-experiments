@@ -11,7 +11,7 @@ function preload() {
 function setup() {
 	createCanvas(400, 400);
 	frameRate(60);
-	controller = new Controller(new Board());
+	controller = new Controller(new Board(), new Logic());
 	controller.init();
 }
 
@@ -26,7 +26,7 @@ function mousePressed() {
 
 function Config() {
 
-	this.TILE_TYPE = {
+	this.COLOR = {
 		WHITE: 0,
 		BLACK: 1
 	}
@@ -61,18 +61,18 @@ function Config() {
 	];
 
 	this.pieces = [
-		{ type: this.PIECE_TYPE.WHITE_KING, id: 'wk', name: "white-king", sprite: null },
-		{ type: this.PIECE_TYPE.WHITE_QUEEN, id: 'wq', name: "white-queen", sprite: null },
-		{ type: this.PIECE_TYPE.WHITE_ROOK, id: 'wr', name: "white-rook", sprite: null },
-		{ type: this.PIECE_TYPE.WHITE_BISHOP, id: 'wb', name: "white-bishop", sprite: null },
-		{ type: this.PIECE_TYPE.WHITE_KNIGHT, id: 'wn', name: "white-knight", sprite: null },
-		{ type: this.PIECE_TYPE.WHITE_PAWN, id: 'wp', name: "white-pawn", sprite: null },
-		{ type: this.PIECE_TYPE.BLACK_KING, id: 'bk', name: "black-king", sprite: null },
-		{ type: this.PIECE_TYPE.BLACK_QUEEN, id: 'bq', name: "black-queen", sprite: null },
-		{ type: this.PIECE_TYPE.BLACK_ROOK, id: 'br', name: "black-rook", sprite: null },
-		{ type: this.PIECE_TYPE.BLACK_BISHOP, id: 'bb', name: "black-bishop", sprite: null },
-		{ type: this.PIECE_TYPE.BLACK_KNIGHT, id: 'bn', name: "black-knight", sprite: null },
-		{ type: this.PIECE_TYPE.BLACK_PAWN, id: 'bp', name: "black-pawn", sprite: null }
+		{ type: this.PIECE_TYPE.WHITE_KING, color: this.COLOR.WHITE, id: 'wk', name: "white-king", sprite: null },
+		{ type: this.PIECE_TYPE.WHITE_QUEEN, color: this.COLOR.WHITE, id: 'wq', name: "white-queen", sprite: null },
+		{ type: this.PIECE_TYPE.WHITE_ROOK, color: this.COLOR.WHITE, id: 'wr', name: "white-rook", sprite: null },
+		{ type: this.PIECE_TYPE.WHITE_BISHOP, color: this.COLOR.WHITE, id: 'wb', name: "white-bishop", sprite: null },
+		{ type: this.PIECE_TYPE.WHITE_KNIGHT, color: this.COLOR.WHITE, id: 'wn', name: "white-knight", sprite: null },
+		{ type: this.PIECE_TYPE.WHITE_PAWN, color: this.COLOR.WHITE, id: 'wp', name: "white-pawn", sprite: null },
+		{ type: this.PIECE_TYPE.BLACK_KING, color: this.COLOR.BLACK, id: 'bk', name: "black-king", sprite: null },
+		{ type: this.PIECE_TYPE.BLACK_QUEEN, color: this.COLOR.BLACK, id: 'bq', name: "black-queen", sprite: null },
+		{ type: this.PIECE_TYPE.BLACK_ROOK, color: this.COLOR.BLACK, id: 'br', name: "black-rook", sprite: null },
+		{ type: this.PIECE_TYPE.BLACK_BISHOP, color: this.COLOR.BLACK, id: 'bb', name: "black-bishop", sprite: null },
+		{ type: this.PIECE_TYPE.BLACK_KNIGHT, color: this.COLOR.BLACK, id: 'bn', name: "black-knight", sprite: null },
+		{ type: this.PIECE_TYPE.BLACK_PAWN, color: this.COLOR.BLACK, id: 'bp', name: "black-pawn", sprite: null }
 	];
 
 	this.loadSprites = function() {
@@ -109,7 +109,7 @@ function Board() {
 			var letter = 'a';
 			this.grid[row] = [];
 			for (var column = 0; column < config.gridSize; column++) {
-				var tileType = (column + row) % 2 ? config.TILE_TYPE.WHITE : config.TILE_TYPE.BLACK;
+				var tileType = (column + row) % 2 ? config.COLOR.WHITE : config.COLOR.BLACK;
 				var tile = new Tile(row, column, tileType, letter, config.gridSize - row);
 				this.grid[row][column] = tile;
 
@@ -154,7 +154,7 @@ function Tile(row, column, tileType, letter, number) {
 	}
 
 	this.show = function(isHighlight) {
-		fill((this.tileType === config.TILE_TYPE.WHITE) ? isHighlight ? 200 : 128 : isHighlight ? 200 : 64);
+		fill((this.tileType === config.COLOR.WHITE) ? isHighlight ? 200 : 128 : isHighlight ? 200 : 64);
 		rect(this.column * config.tileSize, this.row * config.tileSize, config.tileSize, config.tileSize);
 
 		if (this.pieceType > 0) {
@@ -175,8 +175,73 @@ function Tile(row, column, tileType, letter, number) {
 	}
 }
 
-function Controller(board) {
+function Logic() {
+	this.getMovesForPieceType = function(type, board, row, column) {
+		var result = [];
+
+		switch (type) {
+			case config.PIECE_TYPE.WHITE_PAWN:
+				result.push(board.getTile(row - 1, column));
+				break;
+			case config.PIECE_TYPE.BLACK_PAWN:
+				result.push(board.getTile(row + 1, column));
+				break;
+			case config.PIECE_TYPE.WHITE_BISHOP:
+			case config.PIECE_TYPE.BLACK_BISHOP:
+				for (var i = -config.gridSize; i <= config.gridSize; i++) {
+					result.push(board.getTile(row + i, column + i));
+					result.push(board.getTile(row + i, column - i));
+				}
+				break;
+			case config.PIECE_TYPE.WHITE_KNIGHT:
+			case config.PIECE_TYPE.BLACK_KNIGHT:
+				for (var i = -2; i <= 2; i += 4) {
+					for (var j = -1; j <= 1; j++) {
+						if (j != 0) {
+							result.push(board.getTile(row - j, column + i));
+							result.push(board.getTile(row + i, column - j));
+						}
+					}
+				}
+				break;
+			case config.PIECE_TYPE.WHITE_ROOK:
+			case config.PIECE_TYPE.BLACK_ROOK:
+				for (var i = -config.gridSize; i <= config.gridSize; i++) {
+					result.push(board.getTile(row, column + i));
+					result.push(board.getTile(row + i, column));
+				}
+				break;
+			case config.PIECE_TYPE.WHITE_QUEEN:
+			case config.PIECE_TYPE.BLACK_QUEEN:
+				for (var i = -config.gridSize; i <= config.gridSize; i++) {
+					result.push(board.getTile(row, column + i));
+					result.push(board.getTile(row + i, column));
+					result.push(board.getTile(row + i, column + i));
+					result.push(board.getTile(row + i, column - i));
+				}
+				break;
+			case config.PIECE_TYPE.WHITE_KING:
+			case config.PIECE_TYPE.BLACK_KING:
+				for (var i = -1; i <= 1; i++) {
+					result.push(board.getTile(row, column + i));
+					result.push(board.getTile(row + i, column));
+					result.push(board.getTile(row + i, column + i));
+					result.push(board.getTile(row + i, column - i));
+				}
+				break;
+		}
+
+		return result;
+	}
+
+	this.arePiecesEnemies = function(firstPiece, secondPiece) {
+		return (firstPiece && secondPiece && config.getPieceByType(firstPiece).color !== config.getPieceByType(secondPiece).color);
+	}
+}
+
+function Controller(board, logic) {
 	this.board = board;
+	this.logic = logic;
 	this.selectedTile = null;
 
 	this.init = function() {
@@ -193,11 +258,11 @@ function Controller(board) {
 				this.selectedTile = tile;
 			}
 		} else {
-			var moves = getMovesForPieceType(this.selectedTile.pieceType, this.board, this.selectedTile.row, this.selectedTile.column);
+			var moves = this.logic.getMovesForPieceType(this.selectedTile.pieceType, this.board, this.selectedTile.row, this.selectedTile.column);
 
 			for (var i = 0; i < moves.length; i++) {
 				if (moves[i] != null) {
-					if (tile.pieceType === undefined) {
+					if (tile.pieceType === undefined || this.logic.arePiecesEnemies(tile.pieceType, this.selectedTile.pieceType)) {
 						if (tile.row === moves[i].row && tile.column === moves[i].column) {
 							var movingPiece = this.selectedTile.pieceType;
 							this.selectedTile.removePieceType();
@@ -213,7 +278,7 @@ function Controller(board) {
 	this.show = function() {
 		var moves = [];
 		if (this.selectedTile) {
-			moves = getMovesForPieceType(this.selectedTile.pieceType, this.board, this.selectedTile.row, this.selectedTile.column);
+			moves = this.logic.getMovesForPieceType(this.selectedTile.pieceType, this.board, this.selectedTile.row, this.selectedTile.column);
 		}
 
 		for (var row = 0; row < config.gridSize; row++) {
@@ -224,7 +289,7 @@ function Controller(board) {
 
 				for (var i = 0; i < moves.length; i++) {
 					if (moves[i] != null) {
-						if (tile.pieceType === undefined) {
+						if (tile.pieceType === undefined || this.logic.arePiecesEnemies(tile.pieceType, this.selectedTile.pieceType)) {
 
 							if (tile.row === moves[i].row && tile.column === moves[i].column) {
 								tile.highlight();
@@ -236,62 +301,4 @@ function Controller(board) {
 			}
 		}
 	}
-}
-
-function getMovesForPieceType(type, board, row, column) {
-	var result = [];
-
-	switch (type) {
-		case config.PIECE_TYPE.WHITE_PAWN:
-			result.push(board.getTile(row - 1, column));
-			break;
-		case config.PIECE_TYPE.BLACK_PAWN:
-			result.push(board.getTile(row + 1, column));
-			break;
-		case config.PIECE_TYPE.WHITE_BISHOP:
-		case config.PIECE_TYPE.BLACK_BISHOP:
-			for (var i = -config.gridSize; i <= config.gridSize; i++) {
-				result.push(board.getTile(row + i, column + i));
-				result.push(board.getTile(row + i, column - i));
-			}
-			break;
-		case config.PIECE_TYPE.WHITE_KNIGHT:
-		case config.PIECE_TYPE.BLACK_KNIGHT:
-			for (var i = -2; i <= 2; i += 4) {
-				for (var j = -1; j <= 1; j++) {
-					if (j != 0) {
-						result.push(board.getTile(row - j, column + i));
-						result.push(board.getTile(row + i, column - j));
-					}
-				}
-			}
-			break;
-		case config.PIECE_TYPE.WHITE_ROOK:
-		case config.PIECE_TYPE.BLACK_ROOK:
-			for (var i = -config.gridSize; i <= config.gridSize; i++) {
-				result.push(board.getTile(row, column + i));
-				result.push(board.getTile(row + i, column));
-			}
-			break;
-		case config.PIECE_TYPE.WHITE_QUEEN:
-		case config.PIECE_TYPE.BLACK_QUEEN:
-			for (var i = -config.gridSize; i <= config.gridSize; i++) {
-				result.push(board.getTile(row, column + i));
-				result.push(board.getTile(row + i, column));
-				result.push(board.getTile(row + i, column + i));
-				result.push(board.getTile(row + i, column - i));
-			}
-			break;
-		case config.PIECE_TYPE.WHITE_KING:
-		case config.PIECE_TYPE.BLACK_KING:
-			for (var i = -1; i <= 1; i++) {
-				result.push(board.getTile(row, column + i));
-				result.push(board.getTile(row + i, column));
-				result.push(board.getTile(row + i, column + i));
-				result.push(board.getTile(row + i, column - i));
-			}
-			break;
-	}
-
-	return result;
 }
